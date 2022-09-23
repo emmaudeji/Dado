@@ -1,3 +1,6 @@
-# system env
-/todo/.flaskenv
-/todo/.env
+
+.vscode
+./todo/__pycache__
+./todo/.flaskenv
+./todo/.env
+./todo/settings
