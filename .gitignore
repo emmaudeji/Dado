@@ -1,2 +1,3 @@
-./todo/.flaskenv
-./todo/.env
+# system env
+/todo/.flaskenv
+/todo/.env
