@@ -1,6 +1,7 @@
-
 .vscode
-./todo/__pycache__
-./todo/.flaskenv
-./todo/.env
-./todo/settings
+todo/__pycache__
+todo/.flaskenv
+todo/.env
+todo/settings
+todo/Pipfile
+todo/Pipfile.lock
