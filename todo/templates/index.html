@@ -10,6 +10,35 @@
     .hidden {
       display: none;
     }
+    .lists-wrapper, .todo-wrapper {
+      display: inline-block;
+      vertical-align: top;
+    }
+    ul {
+      margin-top: 8px;
+      list-style: none;
+      padding:0;
+      margin: 0;
+      width: 270px;
+      }
+    li {
+      clear: both;
+      display: flex;
+      align-items: center;
+      justify-items: center;
+    } 
+    .check-checkbox {
+      margin-right: 10px;
+    }
+    .delete-button {
+      -webkit-appearance: none;
+      outline: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
   </style>
 
 </head>
@@ -17,20 +46,87 @@
   <h1>To do Task</h1>
   <br/>
 
-  <form id="form">
-    <input type="text" name="description" id="description"/>
-    <input type="submit" value="Create">
-  </form>
-
-  <div id="error" class="hidden">Something went wrong!</div>
-
-  <ul id="todo">
-    {% for data in data %}
-      <li>{{ data }}</li>
-    {% endfor %}
-  </ul>
+  <div class="lists-wrapper">
+    <!-- <h3>Category</h3> -->
+    <ul>
+      {% for list in lists %}
+        <li>
+          <a href="/lists/{{ list.id }}">{{ list.name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="todo-wrapper">
+    <h3>{{ active_list.name }}</h3>
+    <form id="form">
+      <input type="text" name="description" id="description" />
+      <input type="submit" value="Create">
+    </form>
+    <div id="error" class="hidden">Something went wrong!</div>
+    <ul id="todo">
+      {% for todo in todos %}
+      <li> <input class="check-checkbox" data-id="{{ todo.id }}" type="checkbox" 
+        {% if todo.set_completed %} 
+          checked 
+        {% endif %} />
+        <div class="li-description">
+          {{todo.description }}
+        </div>
+        <button class="delete-button" data-id="{{ todo.id }}">&cross;</button>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
 
   <script>
+    // implement delete button for each todo item
+    const deleteButtons = document.querySelectorAll('.delete-button');
+    for (let i = 0; i < deleteButtons.length; i++) {
+      const deleteButton = deleteButtons[i];
+      deleteButton.onclick = function(e) {
+        console.log('event', e);
+        const todoId = e.target.dataset['id']
+        fetch('/todos/' + todoId , {
+          method: 'DELETE'
+        })
+          .then(function () {
+            document.getElementById('error').className = "hidden";
+          })
+          .catch(function () {
+            document.getElementById('error').className = "";
+          })
+      }
+  } 
+
+    // check checkbox and update checkbox
+    const checkboxes = document.querySelectorAll('.check-checkbox');
+    for (let i = 0; i < checkboxes.length; i++) {
+        const checkbox = checkboxes[i];
+        checkbox.onchange = function (e) {
+          console.log('event', e);
+          const newCompleted = e.target.checked;
+          console.log('newCompleted', newCompleted);
+          const todoId = e.target.dataset['id']
+          console.log('id-', todoId);
+          fetch('/todos/' + todoId + '/set_completed', {
+            method: 'POST',
+            body: JSON.stringify({
+              'completed': newCompleted
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then (function() {
+            document.getElementById('error').className = "hidden";
+          })
+          .catch(function () {
+            document.getElementById('error').className = "";
+          })
+        }
+      }
+
+    //  create todo and display list
     document.getElementById("form").onsubmit = function (event) {
       event.preventDefault();
       fetch('/todo/create', {
